@@ -1,6 +1,10 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import {
+  stripTransientQueryParamsFromAsPath,
+  stripTransientQueryParamsFromUrl
+} from '@/lib/utils/stripTransientUrlParams'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import CONFIG from '../config'
@@ -13,11 +17,15 @@ const ArticleCopyright = ({ post }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setFullUrl(window.location.href)
+      setFullUrl(stripTransientQueryParamsFromUrl(window.location.href))
       return
     }
     const base = (siteConfig('LINK') || '').replace(/\/$/, '')
-    const path = (post?.href || router?.asPath || `/${post?.slug || ''}`).replace(/^\//, '/')
+    const raw = post?.href || router?.asPath || `/${post?.slug || ''}`
+    const path =
+      raw.startsWith('http://') || raw.startsWith('https://')
+        ? stripTransientQueryParamsFromUrl(raw)
+        : stripTransientQueryParamsFromAsPath(raw)
     setFullUrl(`${base}${path}`)
   }, [post?.href, post?.slug, router?.asPath])
 
@@ -39,12 +47,15 @@ const ArticleCopyright = ({ post }) => {
 
   if (!siteConfig('FUWARI_ARTICLE_COPYRIGHT', true, CONFIG) || !post) return null
 
+  const authorName = (siteConfig('AUTHOR') || '').trim() || siteConfig('TITLE')
+  const profileHref = siteConfig('FUWARI_PROFILE_PATH', '/about', CONFIG)
+
   return (
     <section className='mt-6 fuwari-card p-4 text-sm text-[var(--fuwari-muted)] leading-7'>
       <div>
         <span className='font-semibold mr-2'>{locale?.COMMON?.AUTHOR || '作者'}:</span>
-        <SmartLink href='/about' className='fuwari-link'>
-          {siteConfig('AUTHOR') || siteConfig('TITLE')}
+        <SmartLink href={profileHref} className='fuwari-link'>
+          {authorName}
         </SmartLink>
       </div>
       <div className='mt-1'>
