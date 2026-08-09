@@ -39,6 +39,59 @@ import TouchMeCard from './components/TouchMeCard'
 import CONFIG from './config'
 import { Style } from './style'
 
+const IndexSkeleton = () => (
+  <div className='pt-10 md:pt-18'>
+    <div className='w-full bg-[#f6f6f1] dark:bg-black'>
+      <div className='mx-auto w-full max-w-screen-3xl px-4 py-10 lg:px-0'>
+        <div className='grid gap-10 xl:grid-cols-2'>
+          <section className='space-y-5'>
+            <div className='h-80 w-full animate-pulse bg-gray-200 dark:bg-gray-800' />
+            <div className='h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-800' />
+            <div className='h-10 w-4/5 animate-pulse bg-gray-200 dark:bg-gray-800' />
+            <div className='h-4 w-2/3 animate-pulse bg-gray-200 dark:bg-gray-800' />
+          </section>
+          <section className='space-y-6'>
+            <div className='h-48 w-full animate-pulse bg-gray-200 dark:bg-gray-800' />
+            {[0, 1].map(item => (
+              <div
+                key={item}
+                className='flex gap-6 border-t border-gray-300 pt-6 dark:border-gray-800'>
+                <div className='min-w-0 flex-1 space-y-3'>
+                  <div className='h-4 w-20 animate-pulse bg-gray-200 dark:bg-gray-800' />
+                  <div className='h-6 w-4/5 animate-pulse bg-gray-200 dark:bg-gray-800' />
+                  <div className='h-4 w-2/3 animate-pulse bg-gray-200 dark:bg-gray-800' />
+                </div>
+                <div className='h-32 w-32 shrink-0 animate-pulse bg-gray-200 dark:bg-gray-800' />
+              </div>
+            ))}
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+const SlugSkeleton = () => (
+  <div className='w-full max-w-screen-3xl mx-auto'>
+    <div className='flex flex-col gap-y-4 py-4 px-2 lg:px-0'>
+      <div className='mx-auto h-6 w-48 animate-pulse bg-gray-200 dark:bg-gray-800' />
+      <div className='mx-auto h-12 w-3/4 max-w-3xl animate-pulse bg-gray-200 dark:bg-gray-800' />
+      <div className='mx-auto h-7 w-2/3 max-w-2xl animate-pulse bg-gray-200 dark:bg-gray-800' />
+    </div>
+    <div className='aspect-video w-full animate-pulse bg-gray-200 dark:bg-gray-800' />
+    <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 py-12'>
+      <div className='hidden h-80 animate-pulse bg-gray-200 dark:bg-gray-800 lg:col-span-1 lg:block' />
+      <div className='mx-auto w-full max-w-3xl space-y-4 px-2 lg:col-span-3 lg:px-0'>
+        <div className='h-6 w-full animate-pulse bg-gray-200 dark:bg-gray-800' />
+        <div className='h-6 w-11/12 animate-pulse bg-gray-200 dark:bg-gray-800' />
+        <div className='h-6 w-10/12 animate-pulse bg-gray-200 dark:bg-gray-800' />
+        <div className='h-48 w-full animate-pulse bg-gray-200 dark:bg-gray-800' />
+      </div>
+      <div className='hidden h-96 animate-pulse bg-gray-200 dark:bg-gray-800 lg:col-span-1 lg:block' />
+    </div>
+  </div>
+)
+
 // 主题全局状态
 const ThemeGlobalMagzine = createContext()
 export const useMagzineGlobal = () => useContext(ThemeGlobalMagzine)
@@ -75,7 +128,7 @@ const LayoutBase = props => {
             <div
               id='main'
               role='main'
-              className='flex-grow' // 这个类保证 main 区域填满剩余的空白
+              className='flex-grow min-h-[60vh] bg-[#f6f6f1] dark:bg-black'
             >
               {children}
             </div>
@@ -100,7 +153,11 @@ const LayoutBase = props => {
  * @returns
  */
 const LayoutIndex = props => {
-  const { posts } = props
+  const posts = Array.isArray(props?.posts) ? props.posts : []
+
+  if (posts.length === 0) {
+    return <IndexSkeleton />
+  }
 
    // ===== 1. Hero区域 =====
   const heroTopPosts = posts.slice(0, 1)
@@ -120,7 +177,7 @@ const LayoutIndex = props => {
   return (
     <div className='pt-10 md:pt-18'>
       {/* 首屏宣传区块 */}
-     <Hero
+      <Hero
         topPosts={heroTopPosts}
         subPosts={heroSubPosts}
       />
@@ -228,7 +285,7 @@ const LayoutSlug = props => {
 
                     {/* 文章底部区域  */}
                     <section>
-                      <div className='py-2 flex justify-end'>
+                      <div className='py-2 flex justify-end flex-nowrap overflow-x-auto scroll-hidden gap-x-3'>
                         {siteConfig('MAGZINE_POST_DETAIL_TAG') &&
                           post?.tagItems?.map(tag => (
                             <TagItemMini key={tag.name} tag={tag} />
@@ -300,9 +357,7 @@ const LayoutSlug = props => {
             )}
 
             {!post && (
-              <div className='flex justify-center items-center w-full py-40'>
-                Loading...
-              </div>
+              <SlugSkeleton />
             )}
           </div>
         )}

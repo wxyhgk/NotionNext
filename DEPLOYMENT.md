@@ -11,7 +11,7 @@ NotionNext 支持多种部署方式，本指南将详细介绍各种部署选项
 为提升跨平台兼容性（Vercel / Cloudflare Pages / Netlify / EdgeOne Pages 等），本项目建议统一使用以下最简流程：
 
 ```bash
-# Node 20（版本以仓库根目录 `.nvmrc` 为准，便于与各平台预装列表对齐）
+# Node 22（版本以仓库根目录 `.nvmrc` 为准，便于与各平台预装列表对齐）
 nvm use || nvm install
 
 # Yarn
@@ -197,15 +197,50 @@ netlify deploy --prod --dir=out
 
 ## 腾讯云 EdgeOne Pages
 
-EdgeOne 构建阶段会按仓库中的 `.nvmrc` 切换 Node 版本。若控制台报错类似 **Failed to switch to Node.js x.y.z**，通常是因为平台上 **未提供该补丁版本**（例如仅有 `20.18.0`，而旧版本 `.nvmrc` 写了 `20.20.0`）。
+EdgeOne 构建阶段会按仓库中的 `.nvmrc` 切换 Node 版本。若控制台报错类似 **Failed to switch to Node.js x.y.z**，通常是因为平台上 **未提供该版本**。
 
 处理方式：
 
-1. **保持上游**：拉取最新 NotionNext，确认 `.nvmrc` 已与 EdgeOne「项目设置 → Node.js 版本」下拉列表中可选版本一致（一般为当前文件中的 `20.18.x`）。
+1. **保持上游**：拉取最新 NotionNext，确认 `.nvmrc` 已与 EdgeOne「项目设置 → Node.js 版本」下拉列表中可选版本一致。
 2. **自建仓库**：在 EdgeOne 控制台选择与 `.nvmrc` **完全一致**的 Node 版本；仍失败时检查构建日志是否仍在读取旧的 `.nvmrc`（需推送后再构建）。
-3. `package.json` 中 `engines.node` 为 `>=20 <25`，在 Node 20 系列内均可构建；关键是 **构建环境实际安装的版本**能解析 `.nvmrc`。
+3. `package.json` 中 `engines.node` 为 `>=22 <25`；关键是 **构建环境实际安装的版本**能解析 `.nvmrc`。
+
+**兼容尝试（按顺序，任选其一即可，不必全做）：**
+
+| 尝试 | 做法 |
+|------|------|
+| A. 对齐版本 | 打开 EdgeOne **项目设置 → Node.js 版本**，选择与仓库根目录 **`.nvmrc` 完全一致**的一项，保存后 **重新部署**。 |
+| B. 改自建 fork | 若平台下拉列表**没有**当前 `.nvmrc` 里的版本：把 fork 里的 `.nvmrc` 改成平台**已有**的 Node 22 版本，推送后再构建。 |
+| C. 清缓存 / 换分支 | 确认构建日志里 **Switching node** 读到的版本已更新；关闭「使用构建缓存」或触发一次无缓存构建，排除旧 `.nvmrc` 缓存。 |
+| D. `engines` 报错时 | 若日志是 **Yarn does not satisfy engine** 而非 **Switching node**：在构建环境设 `YARN_IGNORE_ENGINES=1`（仅当确为 engines 校验问题时使用）。 |
+| E. 按平台要求写版本 | 若平台不支持 `.nvmrc` 仅写 `22`，改为平台支持的 Node 22 完整版本号。 |
+
+说明：Next.js 14 与当前依赖不要求锁在某一补丁版本；**兼容的核心是「平台实际能装上的 Node」与「`.nvmrc` / 控制台选择」一致**。
 
 构建命令与静态导出等与其它平台相同，按需配置环境变量（至少 `NOTION_PAGE_ID`）。
+
+### `yarn install` 报 `ENOSPC: no space left on device`
+
+与 **Node 版本** 无关（日志里已出现正确 Node 版本即表示切换成功）。错误 **`ENOSPC`** 表示构建机 **磁盘或 `/dev/shm`（内存盘）空间不足**，在安装依赖从 cache 拷贝到 `node_modules` 时写满。
+
+**可尝试：**
+
+1. **向 EdgeOne / 腾讯云工单反馈**：说明构建任务在 `yarn install` 阶段 `ENOSPC`，申请更大构建盘或确认是否为平台侧临时配额。  
+2. **减少单次写入体积**（若控制台支持自定义安装命令）：  
+   - 使用 `yarn install --frozen-lockfile --prefer-offline` 且**开启依赖缓存**（命中缓存时少下载）；或  
+   - 在构建前增加 `yarn cache clean`（会多下载，仅当怀疑缓存损坏时尝试，**不一定**缓解 ENOSPC）。  
+3. **自定义 Yarn 缓存目录**（若平台文档支持挂载更大分区）：设置环境变量 **`YARN_CACHE_FOLDER`** 到有足够剩余空间的路径（具体以 EdgeOne 构建环境说明为准）。  
+4. **换构建方案**：在磁盘更大的 CI（如 GitHub Actions）完成 `yarn build` / `next build`，将产物同步到 EdgeOne（仅静态托管），绕过 Pages 内置构建机容量限制。
+
+**备选：怀疑「构建/文件缓存」把空间占满时**
+
+| 做法 | 适用阶段 | 说明 |
+|------|----------|------|
+| **关闭 EdgeOne「依赖/构建缓存」再构建** | `yarn install` 前后 | 若平台在恢复缓存后又解压一份 `node_modules`，可能出现「缓存 + 工作区」双份占用 **`/dev/shm`**。在控制台**关闭缓存恢复**后重试（构建会变慢，但有时能腾出空间；视平台实现而定）。 |
+| **`YARN_CACHE_FOLDER` 指到大磁盘路径** | `yarn install` | 避免 Yarn 默认缓存与仓库同落在小容量分区；路径以 **EdgeOne 官方文档** 为准。 |
+| **构建环境变量 `ENABLE_CACHE=false`** | **`next build` 阶段** | 关闭 Notion 数据**读**盘缓存为主，会**增加 Notion 请求与耗时**；**锁文件/会话目录仍可能写入**。对日志里 **`yarn install` 拷贝 `node_modules` 即失败**的 ENOSPC **通常无效**，因尚未执行到 Next 构建。 |
+
+仓库本身无法通过改 `package.json` 消除平台磁盘上限；根本解决依赖 **构建环境配额** 或 **外置构建**。
 
 ## Docker 部署
 
@@ -309,6 +344,8 @@ docker-compose up -d
 ```bash
 yarn export
 ```
+
+若构建出现 Notion API 过慢或 `timeout of 300 seconds`，可在平台环境变量中配置 `BUILD_PREFETCH_ENABLED`、`STATIC_PAGE_GENERATION_TIMEOUT` 等，详见 [docs/user-guide/deploy/build-tuning.md](docs/user-guide/deploy/build-tuning.md)。
 
 ### GitHub Pages 部署
 

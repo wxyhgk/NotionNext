@@ -1,9 +1,34 @@
 /* eslint-disable react/no-unknown-property */
+import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
+import { siteConfig } from '@/lib/config'
+import CONFIG from './config'
+
 /**
  * Claude Theme — 模仿 Claude Code Docs 的设计风格
  * 包含浅色和深色模式
  */
 const Style = () => {
+  const accentLight = siteConfig('CLAUDE_COLOR_ACCENT', '#DA7756', CONFIG)
+  const accentHoverLight = siteConfig('CLAUDE_COLOR_ACCENT_HOVER', '#C06042', CONFIG)
+  const backgroundLight = siteConfig('CLAUDE_COLOR_BG', '#ffffff', CONFIG)
+  const surfaceLight = siteConfig(
+    'CLAUDE_COLOR_CARD',
+    siteConfig('CLAUDE_COLOR_BG_SECONDARY', '#F3F3EE', CONFIG),
+    CONFIG
+  )
+  const textLight = siteConfig('CLAUDE_COLOR_TEXT', '#1A1A1A', CONFIG)
+  const textSecondaryLight = siteConfig('CLAUDE_COLOR_TEXT_SECONDARY', '#5C5C5C', CONFIG)
+  const textTertiaryLight = siteConfig('CLAUDE_COLOR_TEXT_TERTIARY', '#8C8C8C', CONFIG)
+  const borderLight = siteConfig('CLAUDE_COLOR_BORDER', '#E5E5E0', CONFIG)
+  const accentDark = siteConfig('CLAUDE_COLOR_ACCENT_DARK', '#D4A27F', CONFIG)
+  const accentHoverDark = siteConfig('CLAUDE_COLOR_ACCENT_HOVER_DARK', '#DA7756', CONFIG)
+  const backgroundDark = siteConfig('CLAUDE_COLOR_BG_DARK', '#1A1915', CONFIG)
+  const surfaceDark = siteConfig('CLAUDE_COLOR_CARD_DARK', '#242320', CONFIG)
+  const textDark = siteConfig('CLAUDE_COLOR_TEXT_DARK', '#9E9E9E', CONFIG)
+  const textSecondaryDark = siteConfig('CLAUDE_COLOR_TEXT_SECONDARY_DARK', '#A0A09C', CONFIG)
+  const textTertiaryDark = siteConfig('CLAUDE_COLOR_TEXT_TERTIARY_DARK', '#6E6E6A', CONFIG)
+  const borderDark = siteConfig('CLAUDE_COLOR_BORDER_DARK', '#333330', CONFIG)
+
   return (
     <style jsx global>{`
       /* ========================================
@@ -49,18 +74,34 @@ const Style = () => {
        * CSS VARIABLES
        * ======================================== */
       :root {
+        --claude-accent-light: ${accentLight};
+        --claude-accent-hover-light: ${accentHoverLight};
+        --claude-bg-light: ${backgroundLight};
+        --claude-bg-secondary-light: ${surfaceLight};
+        --claude-text-primary-light: ${textLight};
+        --claude-text-secondary-light: ${textSecondaryLight};
+        --claude-text-tertiary-light: ${textTertiaryLight};
+        --claude-border-light: ${borderLight};
+        --claude-accent-dark: ${accentDark};
+        --claude-accent-hover-dark: ${accentHoverDark};
+        --claude-bg-dark: ${backgroundDark};
+        --claude-bg-secondary-dark: ${surfaceDark};
+        --claude-text-primary-dark: ${textDark};
+        --claude-text-secondary-dark: ${textSecondaryDark};
+        --claude-text-tertiary-dark: ${textTertiaryDark};
+        --claude-border-dark: ${borderDark};
         --claude-gh-blue-bg: rgb(9, 105, 218);
         --claude-gh-blue-bg-rgb: 9 105 218;
-        --claude-bg: #fff;
-        --claude-bg-secondary: #F3F3EE;
-        --claude-text-primary: #1A1A1A;
+        --claude-bg: var(--claude-bg-light);
+        --claude-bg-secondary: var(--claude-bg-secondary-light);
+        --claude-text-primary: var(--claude-text-primary-light);
         --claude-text-strong: var(--claude-text-primary);
         --tw-prose-code: #111827;
-        --claude-text-secondary: #5C5C5C;
-        --claude-text-tertiary: #8C8C8C;
-        --claude-border: #E5E5E0;
-        --claude-accent: #DA7756;
-        --claude-accent-hover: #C06042;
+        --claude-text-secondary: var(--claude-text-secondary-light);
+        --claude-text-tertiary: var(--claude-text-tertiary-light);
+        --claude-border: var(--claude-border-light);
+        --claude-accent: var(--claude-accent-light);
+        --claude-accent-hover: var(--claude-accent-hover-light);
         --claude-sidebar-bg: var(--claude-bg-secondary);
         --claude-sidebar-active-bg: rgba(218, 119, 86, 0.08);
         --claude-sidebar-active-text: var(--claude-accent);
@@ -83,7 +124,7 @@ const Style = () => {
         --claude-code-bg: var(--claude-bg);
         --claude-code-border: rgb(222 222 222);
         --claude-code-shell-bg: rgb(243 243 243);
-        --claude-code-shell-border: rgba(255, 255, 255, 0.1);
+        --claude-code-shell-border: rgb(222 222 222);
         --claude-code-shell-text: rgb(10 10 10);
         --claude-code-text: #657b83;
         --claude-code-token-comment: #93a1a1;
@@ -139,16 +180,16 @@ const Style = () => {
       html[data-theme='dark'] {
         --claude-gh-blue-bg: rgb(31, 111, 235);
         --claude-gh-blue-bg-rgb: 31 111 235;
-        --claude-bg: #1A1915;
-        --claude-bg-secondary: #242320;
-        --claude-text-primary: #9E9E9E;
+        --claude-bg: var(--claude-bg-dark);
+        --claude-bg-secondary: var(--claude-bg-secondary-dark);
+        --claude-text-primary: var(--claude-text-primary-dark);
         --claude-text-strong: #FFFFFF;
         --tw-prose-code: #fff;
-        --claude-text-secondary: #A0A09C;
-        --claude-text-tertiary: #6E6E6A;
-        --claude-border: #333330;
-        --claude-accent: #D4A27F;
-        --claude-accent-hover: #DA7756;
+        --claude-text-secondary: var(--claude-text-secondary-dark);
+        --claude-text-tertiary: var(--claude-text-tertiary-dark);
+        --claude-border: var(--claude-border-dark);
+        --claude-accent: var(--claude-accent-dark);
+        --claude-accent-hover: var(--claude-accent-hover-dark);
         --claude-sidebar-bg: #1E1D1A;
         --claude-sidebar-active-bg: rgba(224, 138, 110, 0.1);
         --claude-sidebar-active-text: #E08A6E;
@@ -209,6 +250,29 @@ const Style = () => {
         --claude-terminal-border: #30363d;
         --claude-terminal-text: #e6edf3;
         --claude-terminal-prompt: #8b949e;
+      }
+
+      #theme-claude {
+        --claude-bg: var(--claude-bg-light);
+        --claude-bg-secondary: var(--claude-bg-secondary-light);
+        --claude-text-primary: var(--claude-text-primary-light);
+        --claude-text-secondary: var(--claude-text-secondary-light);
+        --claude-text-tertiary: var(--claude-text-tertiary-light);
+        --claude-border: var(--claude-border-light);
+        --claude-accent: var(--claude-accent-light);
+        --claude-accent-hover: var(--claude-accent-hover-light);
+      }
+
+      .dark #theme-claude,
+      html[data-theme='dark'] #theme-claude {
+        --claude-bg: var(--claude-bg-dark);
+        --claude-bg-secondary: var(--claude-bg-secondary-dark);
+        --claude-text-primary: var(--claude-text-primary-dark);
+        --claude-text-secondary: var(--claude-text-secondary-dark);
+        --claude-text-tertiary: var(--claude-text-tertiary-dark);
+        --claude-border: var(--claude-border-dark);
+        --claude-accent: var(--claude-accent-dark);
+        --claude-accent-hover: var(--claude-accent-hover-dark);
       }
 
       /* ========================================
@@ -2076,7 +2140,7 @@ const Style = () => {
         color: var(--claude-code-shell-text) !important;
       }
 
-      /* Collapse wrapper from PrismMac: remove extra header/borders to avoid double frame */
+      /* Collapse wrapper from PrismMac: make the shell itself carry the code frame */
       #theme-claude .collapse-wrapper {
         width: 100% !important;
         padding: 0 !important;
@@ -2085,9 +2149,9 @@ const Style = () => {
       #theme-claude .collapse-wrapper > div {
         box-sizing: border-box !important;
         background-clip: border-box !important;
-        border: none !important;
-        border-radius: 0 !important;
-        background: transparent !important;
+        border: 1px solid var(--claude-code-shell-border) !important;
+        border-radius: 0.875rem !important;
+        background: var(--claude-code-shell-bg) !important;
         color: var(--claude-code-shell-text) !important;
         font-family: var(--claude-body-font) !important;
         font-size: 1rem !important;
@@ -2095,13 +2159,14 @@ const Style = () => {
         line-height: 1.75rem !important;
         padding: 0 !important;
         box-shadow: none !important;
+        overflow: hidden !important;
       }
       .dark #theme-claude .collapse-wrapper > div {
         box-sizing: border-box !important;
         background-clip: border-box !important;
-        border: none !important;
-        border-radius: 0 !important;
-        background: transparent !important;
+        border: 1px solid var(--claude-code-shell-border) !important;
+        border-radius: 0.875rem !important;
+        background: var(--claude-code-shell-bg) !important;
         color: var(--claude-code-shell-text) !important;
       }
       #theme-claude .collapse-wrapper .code-toolbar {
@@ -2109,7 +2174,25 @@ const Style = () => {
         padding: 0 !important;
         border: none !important;
         border-radius: 0 !important;
-        background: transparent !important;
+        background: var(--claude-code-shell-bg) !important;
+      }
+      #theme-claude .collapse-panel > .code-toolbar {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: var(--claude-code-shell-bg) !important;
+      }
+      #theme-claude .collapse-panel > .code-toolbar > pre.notion-code {
+        max-width: 100% !important;
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: var(--claude-code-bg) !important;
       }
       #theme-claude .collapse-wrapper > div > div.cursor-pointer.select-none {
         display: none !important;
@@ -2600,7 +2683,9 @@ const Style = () => {
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-    `}</style>
+
+      ${themeConsoleStyle('claude', CONFIG)}
+  `}</style>
   )
 }
 

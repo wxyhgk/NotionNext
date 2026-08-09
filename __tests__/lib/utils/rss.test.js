@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { generateRss } from '@/lib/utils/rss'
+import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { getPostBlocks } from '@/lib/db/SiteDataApi'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
@@ -112,5 +112,14 @@ describe('generateRss', () => {
     )
     expect(fs.writeFileSync).toHaveBeenCalledTimes(3)
   })
-})
 
+  it('generates RSS only for the default locale during multi-locale builds', () => {
+    expect(shouldGenerateRssForLocale({ locale: undefined })).toBe(true)
+    expect(
+      shouldGenerateRssForLocale({ locale: 'zh-CN', defaultLocale: 'zh-CN' })
+    ).toBe(true)
+    expect(
+      shouldGenerateRssForLocale({ locale: 'en', defaultLocale: 'zh-CN' })
+    ).toBe(false)
+  })
+})
